@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- saved from url=(0025)http://192.168.42.1:5000/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    </head>
+    <body>
+        <p1 id="candata"></p1>
+        <div id="future"></div>
+        
+         <script src="./192.168.42.1_files/jquery.js.download"></script>
+        <script src="./192.168.42.1_files/socket.io.js.download"></script>
+    
+<script>
+  //chart
+  /*
+  {
+    var dps = [];   //dataPoints.
+    var chart = new CanvasJS.Chart("chartContainer",{
+      title :{
+        text: "Live Data"
+      },
+      axisX: {
+        title: "Axis X Title"
+      },
+      axisY: {
+        title: "Units"
+      },
+      data: [{
+        type: "line",
+        dataPoints : dps
+      }]
+    });
+    chart.render();
+    var xVal = dps.length + 1;
+    var yVal = 15;
+    var updateInterval = 1000;
+    var updateChart = function () {
+      yVal = yVal +  Math.round(5 + Math.random() *(-5-5));
+      dps.push({x: xVal,y: yVal});
+      xVal++;
+      if (dps.length >  10 ) {
+        dps.shift();
+      }
+      chart.render();
+      // update chart after specified time.
+    };
+  }
+*/
+  //socket
+  var socket = io.connect('http://192.168.42.1:5000');
+  socket.on('connect', function(data) {
+    socket.emit('join', 'Hello World from client');
+  });
+
+  socket.on('gotcandata', (data) => {
+    document.getElementById("candata").innerHTML = data;
+
+  });
+
+  //functions go here
+
+  function bin2String(array) {
+    var result = "";
+    for (var i = 0; i < array.length; i++) {
+      result += String.fromCharCode(parseInt(array[i], 8));
+    }
+    return result;
+  }
+
+  function ab2str(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  }
+
+</script>
+
+</body></html>
