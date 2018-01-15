@@ -141,9 +141,15 @@ void taskPedalBoxMsgHandler() {
 
 			if (throttle_avg > .1)
 			{
-
+				/* Original
 				//no errors, set throttle to value received from pedalbox
 				car.throttle_acc += (throttle_avg * MAX_THROTTLE_LEVEL);
+				car.throttle_cnt ++;
+				*/
+				/*
+					Code Additions Added by Raymond Dong
+				*/
+				car.throttle_acc += throttle_avg;
 				car.throttle_cnt ++;
 			}
 

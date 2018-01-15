@@ -53,7 +53,14 @@
 #define QUEUE_SIZE_TXCAN			3
 #define QUEUE_SIZE_MCFRAME			3
 
-
+/*
+	Code Additions Added by Raymond Dong
+*/
+// Gradual Acceleration
+#define POLY_POWER					2		// Polynomial Power 
+#define POLY_PEAK					0.95	// Polynomial Peak
+#define POLY_PIT					0.1		// Polynomial Pit
+// y = (peak - pit)^(-1 * power) * MAX_THROTTLE_LEVEL * (x - pit)^(power)
 
 typedef enum
 {
