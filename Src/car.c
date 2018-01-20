@@ -375,13 +375,13 @@ void taskCarMainRoutine() {
 				{
 					torque_to_send = 0;
 				}
-				else if(car.throttle / car.throttle_cnt >= POLY_PEAK)
+				else if(car.throttle_acc / car.throttle_cnt >= POLY_PEAK)
 				{
 					torque_to_send = MAX_THROTTLE_LEVEL;
 				}
 				else
 				{
-					torque_to_send = powf({POLY_PEAK - POLY_PIT, -1 * POLY_POWER) * MAX_THROTTLE_LEVEL * powf(car.throttle_acc / car.throttle_cnt - POLY_PIT, POLY_POWER);
+					torque_to_send = powf((POLY_PEAK - POLY_PIT), (-1 * POLY_POWER)) * MAX_THROTTLE_LEVEL * powf((car.throttle_acc / car.throttle_cnt - POLY_PIT), POLY_POWER);
 				}
 				car.throttle_acc = 0;
 				car.throttle_cnt = 0;
