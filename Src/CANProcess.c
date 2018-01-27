@@ -358,7 +358,7 @@ void processCalibrate(CanRxMsgTypeDef* rx) {
 *     Global Dependents:
 *	    1. actualTorque
 *		2. actualDC
-*		3. calcTorqueLimit
+*		3. DCLimit
 *		4. pedalTorque
 *
 *     Function Description:
@@ -368,25 +368,33 @@ void processCalibrate(CanRxMsgTypeDef* rx) {
 void processBamoCar(CanRxMsgTypeDef* rx)
 {
 	/*
-	{actual torque}		{actual dc current}
-	{dc current limit}	{calculated torque limit}
-	{pedal torque}		{torque command}
+	{actual torque}				{actual dc current}			{dc current limit}
+	{calculated torque limit}	{pedal torque}				{torque command}
 
 	{calculated torque limit} = {dc current limit}/{actual dc current} * {actual torque}
 	if {calculated torque limit} > {pedal torque}
-	  send {calculated torque limit}
+		send {calculated torque limit}
 	else
-	   send {pedal torque}
-	end
+		send {pedal torque}
 	*/
-	actualTorque = rx->Data[];
-	actualDC = rx->Data[];
-	pedalTorque = rx->Data[];
-	calcTorqueLimit = DCLimit / actualDC * actualTorque;
-	// DCLimit is constant?
-	if(calcTorqueLimit > pedalTorque)
-		send calcTorqueLimit;
-	else
-		send pedalTorque;
-	end
+	if (rx->Data[0] == REGID???)
+	{
+		actualTorque = rx->Data[1];
+		BCparam = 1;
+	}
+	if (rx->Data[0] == REGID???)
+	{
+		actualDC = rx->Data[1];
+		BCparam = 2;
+	}
+	if (rx->Data[0] == REGID???)
+	{
+		DCLimit = rx->Data[1];
+		BCparam = 3;
+	}
+	if (rx->Data[0] == REGID???)
+	{
+		pedalTorque = rx->Data[1];
+		BCparam = 4;
+	}
 }
