@@ -62,6 +62,8 @@
 #define POLY_PIT					0.1		// Polynomial Pit
 // y = (peak - pit)^(-1 * power) * MAX_THROTTLE_LEVEL * (x - pit)^(power)
 
+
+
 typedef enum
 {
 	BRAKE_LIGHT_OFF = GPIO_PIN_RESET,
@@ -96,7 +98,12 @@ typedef enum {
 	CALIBRATE_BRAKE_MAX
 } Calibrate_flag_t;
 
-
+int BCparam;
+int actualTorque0700;
+int actualTorque1508;
+int actualDC;
+int DCLimit;
+int calcTorqueLimit;
 
 typedef struct {
 

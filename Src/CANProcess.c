@@ -369,7 +369,7 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 {
 	/*
 	{actual torque}				{actual dc current}			{dc current limit}
-	{calculated torque limit}	{pedal torque}				{torque command}
+	{calculated torque limit}	{pedal torque}
 
 	{calculated torque limit} = {dc current limit}/{actual dc current} * {actual torque}
 	if {calculated torque limit} > {pedal torque}
@@ -377,9 +377,10 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 	else
 		send {pedal torque}
 	*/
-	if (rx->Data[0] == REGID???)
+	if (rx->Data[0] == REGID_I_ACT)
 	{
-		actualTorque = rx->Data[1];
+		actualTorque0700 = rx->Data[1];
+		actualTorque1508 = rx->Data[2];
 		BCparam = 1;
 	}
 	if (rx->Data[0] == REGID???)
