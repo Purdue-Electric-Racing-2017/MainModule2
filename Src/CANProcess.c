@@ -222,7 +222,8 @@ void taskRXCANProcess()
 				}
 				case ID_BAMOCAR_STATION_RX: { //if bamocar message
 					//forward frame to mc frame queue
-					xQueueSend(car.q_mc_frame, &rx, 100);
+					processBamoCar(&rx);
+					//xQueueSend(car.q_mc_frame, &rx, 100);
 				}
 				case  	ID_WHEEL_FR:
 				case	ID_WHEEL_FL:
@@ -339,4 +340,53 @@ void processCalibrate(CanRxMsgTypeDef* rx) {
 		car.calibrate_flag = CALIBRATE_NONE;
 	}
 
+}
+
+/***************************************************************************
+*
+*     Function Information
+*
+*     Name of Function: processBamoCar
+*
+*     Programmer's Name: Raymond Dong, raymonddonghome@gmail.com
+*
+*     Function Return Type: none
+*
+*     Parameters:
+*		1. CanRxMsgTypeDef* rx, CAN frame to be converted into a bamocar message
+*     
+*     Global Dependents:
+*	    1. actualTorque
+*		2. actualDC
+*		3. calcTorqueLimit
+*		4. pedalTorque
+*
+*     Function Description:
+*     	Updates variables
+*
+***************************************************************************/
+void processBamoCar(CanRxMsgTypeDef* rx)
+{
+	/*
+	{actual torque}		{actual dc current}
+	{dc current limit}	{calculated torque limit}
+	{pedal torque}		{torque command}
+
+	{calculated torque limit} = {dc current limit}/{actual dc current} * {actual torque}
+	if {calculated torque limit} > {pedal torque}
+	  send {calculated torque limit}
+	else
+	   send {pedal torque}
+	end
+	*/
+	actualTorque = rx->Data[];
+	actualDC = rx->Data[];
+	pedalTorque = rx->Data[];
+	calcTorqueLimit = DCLimit / actualDC * actualTorque;
+	// DCLimit is constant?
+	if(calcTorqueLimit > pedalTorque)
+		send calcTorqueLimit;
+	else
+		send pedalTorque;
+	end
 }

@@ -74,6 +74,7 @@ void CANFilterConfig();
 void taskRXCANProcess();
 void taskTXCAN();
 void taskRXCAN();
+void processBamoCar(CanRxMsgTypeDef* rx);
 void processWheelModuleFrame(CanRxMsgTypeDef* rx);
 void processPedalboxFrame(CanRxMsgTypeDef* rx);
 
