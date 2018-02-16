@@ -50,9 +50,9 @@ void carInit() {
 	car.phcan = &hcan1;
 	car.calibrate_flag = CALIBRATE_NONE;
 	car.throttle1_min = 0x0a90;
-	car.throttle1_max = 0x0420;
+	car.throttle1_max = 0x0540;
 	car.throttle2_min = 0x0920;
-	car.throttle2_max = 0x0320;
+	car.throttle2_max = 0x0400;//0x0320;
 	car.pb_msg_rx_time = 4294967295;
 
 
@@ -294,6 +294,28 @@ void taskSoundBuzzer(int* time_ms) {
 		vTaskDelay((uint32_t) time_ms / portTICK_RATE_MS);
 		HAL_GPIO_WritePin(Buzzer_CTRL_GPIO_Port, Buzzer_CTRL_Pin, GPIO_PIN_RESET); //turn off buzzer
 		vTaskDelete(NULL);
+	}
+}
+
+void taskSendAccel(int* period) {
+	Acceldata_t aData;
+	CanTxMsgTypeDef tx;
+	while (1) {
+		Read_Axes(&aData);
+		tx.DLC = 6;
+		tx.RTR = CAN_RTR_DATA;
+		tx.IDE = CAN_ID_STD;
+		tx.StdId = 0x420;
+		tx.Data[0] = (aData.x >> 8) & 0xFF;
+		tx.Data[1] = (aData.x) & 0xFF;
+		tx.Data[2] = (aData.y >> 8) & 0xFF;
+		tx.Data[3] = (aData.y) & 0xFF;
+		tx.Data[4] = (aData.z >> 8) & 0xFF;
+		tx.Data[5] = (aData.z) & 0xFF;
+
+		car.phcan->pTxMsg = &tx;
+		HAL_CAN_Transmit_IT(car.phcan);						//transmit staged message
+
 	}
 }
 

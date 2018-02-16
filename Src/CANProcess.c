@@ -213,7 +213,7 @@ void taskRXCANProcess()
 			{
 				case ID_PEDALBOX2:  //if pedalbox1 message
 				{
-					processPedalboxFrame(&rx); //todo check if copies properly
+					processPedalboxFrame(&rx);
 					break;
 				}
 				case ID_PEDALBOXCALIBRATE: {
