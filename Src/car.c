@@ -241,6 +241,7 @@ void taskMotorControllerPoll(void* param)
 *
 ***************************************************************************/
 {
+	/*
 	int numStates = 2;
 	int state = 0;
 	for (;;)
@@ -263,6 +264,41 @@ void taskMotorControllerPoll(void* param)
 			vTaskDelay(50/state);
 		} else {
 			vTaskDelay(20);
+		}
+	}
+	*/
+	while(1)
+	{
+		// Request Parameters
+		while(BCparam != 5)
+		{
+			BCparam = 0;			// BCparam 0 - Empty param
+			mcCmdTransmissionRequestSingle(REGID_I_ACT);
+			while(BCparam != 1) {}	// BCparam 1 - Recieved param 1
+			mcCmdTransmissionRequestSingle(REGID???);
+			while(BCparam != 2) {}	// BCparam 2 - Recieved param 2
+			// actualDC in BMS
+			mcCmdTransmissionRequestSingle(REGID???);
+			while(BCparam != 3) {}	// BCparam 3 - Recieved param 3
+			// DCLimit in BMS
+			mcCmdTransmissionRequestSingle(REGID???);
+			while(BCparam != 4) {}	// BCparam 4 - Recieved param 4
+			// pedalTorque == throttle_avg?
+			BCparam = 5;			// BCparam 5 - Recieved all param
+		}
+		// Process Updates
+		if(BCparam == 5)
+		{
+			BCparam = 0;
+			calcTorqueLimit = DCLimit / actualDC * actualTorque;
+			if(calcTorqueLimit > pedalTorque)
+			{
+				send calcTorqueLimit;
+			}
+			else
+			{
+				send pedalTorque;
+			}
 		}
 	}
 }

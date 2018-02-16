@@ -9,8 +9,8 @@
 *
 *     File dependents: (header files, flow charts, referenced documentation)
 *       1. motor_controller_functions.h
-*       http://www.unitek-online.de/pdf/download/Antriebe-Drive/Servo-Digital/E-DS-CAN.pdf
-*     	http://www.unitek-online.de/pdf/download/Antriebe-Drive/Servo-Digital/E-DS-NDrive.pdf
+*       https://www.unitek-industrie-elektronik.de/menu-can-en/menu-can-manual-en
+*     	https://www.unitek-industrie-elektronik.de/menu-ndrive-en/menu-ndrive-manual-en
 *
 *
 *     File Description:
