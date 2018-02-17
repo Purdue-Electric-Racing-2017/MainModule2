@@ -16,6 +16,7 @@
 #include "CANProcess.h"
 #include "BMS.h"
 #include "WheelModule.h"
+#include "accelerometer.h"
 #include <math.h>
 
 
@@ -31,6 +32,7 @@
 #define BRAKE_LIGHT_PIN		GPIO_PIN_7
 #define HEARTBEAT_PORT		GPIOE
 #define HEARTBEAT_PIN		GPIO_PIN_1
+
 
 
 #define BRAKE_PRESSED_THRESHOLD	.05
@@ -118,8 +120,10 @@ typedef struct {
 	int32_t				brake1_max;
 	int32_t				brake2_min;
 	int32_t				brake2_max;
-	int64_t 				throttle_acc;				//sum of car's intended throttle messages from pedalbox since last cmd sent to MC
-	int16_t					throttle_cnt;				//number of throttle messages in accumulator
+	float 				throttle_acc;				//sum of car's intended throttle messages from pedalbox since last cmd sent to MC
+			// int64_t
+	float					throttle_cnt;				//number of throttle messages in accumulator
+			// int16_t
 	int16_t 				brake;						//car's intended brake position
 	uint32_t				pb_msg_rx_time;				//indicates when a pedalbox message was last received
 	uint32_t				apps_imp_first_time_ms;		//indicates when the first imp error was received
