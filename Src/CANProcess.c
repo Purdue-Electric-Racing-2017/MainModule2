@@ -377,30 +377,25 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 	else
 		send {pedal torque}
 	*/
-	if (rx->Data[0] == REGID_I_ACT)
+	if (rx->StdId == REGID_I_ACT)
 	{
-		actualTorque0700 = rx->Data[1];
-		actualTorque1508 = rx->Data[2];
+		actualTorque0700 = rx->Data[0];
+		actualTorque1508 = rx->Data[1];
 		actualTorque = actualTorque0700 | (actualTorque1508 << 8);
-		BCparam = 1;
+		BCparam = 1;	//actualTorque received
 	}
-	if (rx->Data[0] == ID_BMS_CUR_VOL)
+	if (rx->StdId == ID_BMS_CUR_VOL)
 	{
 		actualDC1508 = rx->Data[0];
 		actualDC0700 = rx->Data[1];
 		actualDC = actualDC0700 | (actualDC1508 << 8);
-		BCparam = 2;
+		BCparam = 2;	//actualDc received
 	}
-	if (rx->Data[0] == ID_BMS_DCL)
+	if (rx->StdId == ID_BMS_DCL)
 	{
 		DCLimit1508 = rx->Data[0];
 		DCLimit0700 = rx->Data[1];
 		DCLimit = DCLimit0700 | (DCLimit1508 << 8);
-		BCparam = 3;
-	}
-	if (rx->Data[0] == REGID???)
-	{
-		pedalTorque = rx->Data[1];
-		BCparam = 4;
+		BCparam = 3;	//DCLimit received
 	}
 }

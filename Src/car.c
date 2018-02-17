@@ -283,32 +283,26 @@ void taskMotorControllerPoll(void* param)
 		// Request Parameters
 		while(BCparam != 5)
 		{
-			BCparam = 0;			// BCparam 0 - Empty param
+			BCparam = 0;			// BCparam 0 - Nothing received
 			mcCmdTransmissionRequestSingle(REGID_I_ACT);
-			while(BCparam != 1) {}	// BCparam 1 - Recieved param 1
+			while(BCparam != 1) {}	// BCparam 1 - actualTorque received
 			mcCmdTransmissionRequestSingle(ID_BMS_PACK_CUR_VOL);
-			while(BCparam != 2) {}	// BCparam 2 - Recieved param 2
-			// actualDC in BMS
+			while(BCparam != 2) {}	// BCparam 2 - actualDC received
 			mcCmdTransmissionRequestSingle(ID_BMS_DCL);
-			while(BCparam != 3) {}	// BCparam 3 - Recieved param 3
-			// DCLimit in BMS
-			mcCmdTransmissionRequestSingle(REGID???);
-			while(BCparam != 4) {}	// BCparam 4 - Recieved param 4
-			// pedalTorque == throttle_avg?
-			BCparam = 5;			// BCparam 5 - Recieved all param
+			while(BCparam != 3) {}	// BCparam 3 - DCLimit received
 		}
 		// Process Updates
-		if(BCparam == 5)
+		if(BCparam == 3)
 		{
 			BCparam = 0;
 			calcTorqueLimit = DCLimit / actualDC / 10 * actualTorque;
 			if(calcTorqueLimit > pedalTorque)
 			{
-				send calcTorqueLimit;
+				torque_to_send = calcTorqueLimit;
 			}
 			else
 			{
-				send pedalTorque;
+				torque_to_send = pedalTorque;
 			}
 		}
 	}
@@ -442,16 +436,16 @@ void taskCarMainRoutine() {
 				*/
 				if(car.throttle_acc / car.throttle_cnt < POLY_PIT)
 				{
-					torque_to_send = 0;
+					pedaltorque = 0;
 				}
 				else if(car.throttle_acc / car.throttle_cnt >= POLY_PEAK)
 				{
-					torque_to_send = MAX_THROTTLE_LEVEL;
+					pedaltorque = MAX_THROTTLE_LEVEL;
 				}
 				else
 				{
-					//torque_to_send = powf((POLY_PEAK - POLY_PIT), (-1 * POLY_POWER)) * MAX_THROTTLE_LEVEL * powf((car.throttle_acc / car.throttle_cnt - POLY_PIT), POLY_POWER);
-					torque_to_send = (1 + exp(-SIG_WIDTH * (POLY_PEAK - (POLY_PIT + 0.5 * (POLY_PEAK + POLY_PIT))))) * MAX_THROTTLE_LEVEL / (1 + exp(-SIG_WIDTH * ((car.throttle_acc / car.throttle_cnt) - (POLY_PIT + 0.5 * (POLY_PEAK + POLY_PIT)))))
+					//pedaltorque = powf((POLY_PEAK - POLY_PIT), (-1 * POLY_POWER)) * MAX_THROTTLE_LEVEL * powf((car.throttle_acc / car.throttle_cnt - POLY_PIT), POLY_POWER);
+					pedaltorque = (1 + exp(-SIG_WIDTH * (POLY_PEAK - (POLY_PIT + 0.5 * (POLY_PEAK + POLY_PIT))))) * MAX_THROTTLE_LEVEL / (1 + exp(-SIG_WIDTH * ((car.throttle_acc / car.throttle_cnt) - (POLY_PIT + 0.5 * (POLY_PEAK + POLY_PIT)))))
 				}
 				car.throttle_acc = 0;
 				car.throttle_cnt = 0;

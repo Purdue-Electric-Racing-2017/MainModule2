@@ -110,6 +110,7 @@ int DCLimit;
 int DCLimit0700;
 int DCLimit1508;
 int calcTorqueLimit;
+int pedaltorque;
 
 typedef struct {
 
