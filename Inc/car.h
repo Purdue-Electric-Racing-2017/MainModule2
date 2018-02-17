@@ -61,7 +61,7 @@
 #define POLY_PEAK					0.95	// Polynomial Peak
 #define POLY_PIT					0.1		// Polynomial Pit
 // y = (peak - pit)^(-1 * power) * MAX_THROTTLE_LEVEL * (x - pit)^(power)
-
+#define SIG_WIDTH					12
 
 
 typedef enum
