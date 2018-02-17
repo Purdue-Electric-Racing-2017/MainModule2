@@ -269,16 +269,27 @@ void taskMotorControllerPoll(void* param)
 	*/
 	while(1)
 	{
+		//0x03B
+		//length 5
+		//byte0 - Pack Current - 2 bytes - MSB First - Big Endian - 0.1A
+		//byte1 - IN USE - 1 bytes - MSB First
+		//byte2 - Pack Inst. Voltage - 2 bytes - MSB First - Big Endian - * (1/10) - 0.1V
+		//byte3 - IN USE - 1 bytes - MSB First
+		//byte4 - CRC Checksum - 1 bytes - MSB First  - +64
+		//0x03C
+		//length 2
+		//byte0 - Pack DCL - 2 bytes - MSB First - Big Endian - 1A
+		//byte1 - IN USE - 1bytes - MSB First
 		// Request Parameters
 		while(BCparam != 5)
 		{
 			BCparam = 0;			// BCparam 0 - Empty param
 			mcCmdTransmissionRequestSingle(REGID_I_ACT);
 			while(BCparam != 1) {}	// BCparam 1 - Recieved param 1
-			mcCmdTransmissionRequestSingle(REGID???);
+			mcCmdTransmissionRequestSingle(ID_BMS_PACK_CUR_VOL);
 			while(BCparam != 2) {}	// BCparam 2 - Recieved param 2
 			// actualDC in BMS
-			mcCmdTransmissionRequestSingle(REGID???);
+			mcCmdTransmissionRequestSingle(ID_BMS_DCL);
 			while(BCparam != 3) {}	// BCparam 3 - Recieved param 3
 			// DCLimit in BMS
 			mcCmdTransmissionRequestSingle(REGID???);
@@ -290,7 +301,7 @@ void taskMotorControllerPoll(void* param)
 		if(BCparam == 5)
 		{
 			BCparam = 0;
-			calcTorqueLimit = DCLimit / actualDC * actualTorque;
+			calcTorqueLimit = DCLimit / actualDC / 10 * actualTorque;
 			if(calcTorqueLimit > pedalTorque)
 			{
 				send calcTorqueLimit;

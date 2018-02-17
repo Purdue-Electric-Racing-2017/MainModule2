@@ -104,7 +104,11 @@ int BCparam;
 int actualTorque0700;
 int actualTorque1508;
 int actualDC;
+int actualDC0700;
+int actualDC1508;
 int DCLimit;
+int DCLimit0700;
+int DCLimit1508;
 int calcTorqueLimit;
 
 typedef struct {

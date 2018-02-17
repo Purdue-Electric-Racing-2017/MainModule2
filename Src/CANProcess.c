@@ -381,16 +381,21 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 	{
 		actualTorque0700 = rx->Data[1];
 		actualTorque1508 = rx->Data[2];
+		actualTorque = actualTorque0700 | (actualTorque1508 << 8);
 		BCparam = 1;
 	}
-	if (rx->Data[0] == REGID???)
+	if (rx->Data[0] == ID_BMS_CUR_VOL)
 	{
-		actualDC = rx->Data[1];
+		actualDC1508 = rx->Data[0];
+		actualDC0700 = rx->Data[1];
+		actualDC = actualDC0700 | (actualDC1508 << 8);
 		BCparam = 2;
 	}
-	if (rx->Data[0] == REGID???)
+	if (rx->Data[0] == ID_BMS_DCL)
 	{
-		DCLimit = rx->Data[1];
+		DCLimit1508 = rx->Data[0];
+		DCLimit0700 = rx->Data[1];
+		DCLimit = DCLimit0700 | (DCLimit1508 << 8);
 		BCparam = 3;
 	}
 	if (rx->Data[0] == REGID???)
