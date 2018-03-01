@@ -64,14 +64,14 @@ void Accelero_Init(Sensitivity_t Sens){
 	HAL_GPIO_WritePin(MEMS_PORT, MEMS_PIN, GPIO_PIN_SET);
 
 	  //flashes lights to show that board is done with INIT
-	  for (int i = 0; i < 5; i++){
-	 		  HAL_GPIO_TogglePin(LED_PORT, RED_LED | GREEN_LED | ORANGE_LED | BLUE_LED);
-	 		  HAL_Delay(200);
-	 	  }
+//	  for (int i = 0; i < 5; i++){
+//	 		  HAL_GPIO_TogglePin(LED_PORT, RED_LED | GREEN_LED | ORANGE_LED | BLUE_LED);
+//	 		  HAL_Delay(200);
+//	 	  }
 
 }
 
-void Read_Axes(Acceldata_t* data){
+void Accelro_Read_Axes(Acceldata_t* data){
 
 	uint8_t buffer[6];
 

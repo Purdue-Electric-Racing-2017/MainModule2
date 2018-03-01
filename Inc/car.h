@@ -16,6 +16,7 @@
 #include "CANProcess.h"
 #include "BMS.h"
 #include "WheelModule.h"
+#include "accelerometer.h"
 #include <math.h>
 
 
@@ -147,5 +148,7 @@ void taskSoundBuzzer(int* time);
 void initRTOSObjects();
 void taskBlink(void* can);
 void stopCar();
+void taskSendAccelero();
+
 
 #endif /* CAR_H_ */

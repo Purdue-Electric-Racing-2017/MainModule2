@@ -69,6 +69,6 @@ typedef struct {
 
 void Accelero_Init(Sensitivity_t Sens);
 void Read_Axis_Data(uint8_t address, uint8_t* data);
-void Read_Axes();
+void Accelro_Read_Axes();
 
 #endif /* ACCELEROMETER_H_ */

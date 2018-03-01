@@ -49,10 +49,10 @@ void carInit() {
 	car.brake = 0;
 	car.phcan = &hcan1;
 	car.calibrate_flag = CALIBRATE_NONE;
-	car.throttle1_min = 0x0a90;
-	car.throttle1_max = 0x0420;
-	car.throttle2_min = 0x0920;
-	car.throttle2_max = 0x0320;
+	car.throttle1_min = 0x0ab0;
+	car.throttle1_max = 0x0530;
+	car.throttle2_min = 0x08b0;
+	car.throttle2_max = 0x0360;
 	car.pb_msg_rx_time = 4294967295;
 
 
@@ -64,14 +64,14 @@ void ISR_StartButtonPressed() {
 		//if (//car.brake >= BRAKE_PRESSED_THRESHOLD &&//check if brake is pressed before starting car
 		//	HAL_GPIO_ReadPin(Precharge_IN_GPIO_Port, Precharge_IN_Pin) == GPIO_PIN_SET //check if precharge has finished
 		//	)
-			car.state = CAR_STATE_PREREADY2DRIVE;
+		car.state = CAR_STATE_PREREADY2DRIVE;
 	} else {
 		car.state = CAR_STATE_INIT;
 	}
 }
 
 
-
+// haha VVVVV
 void taskLaunchControl() {
 	while (1) {
 		vTaskDelay(LAUNCH_CONTROL_INTERVAL_MS);
@@ -183,9 +183,10 @@ void initRTOSObjects() {
 	xTaskCreate(taskPedalBoxMsgHandler, "PedalBoxMsgHandler", 512, NULL, 1, NULL);
 	xTaskCreate(taskCarMainRoutine, "CarMainRoutine", 512, NULL, 1, NULL);
 	xTaskCreate(taskTXCAN, "TX CAN", 512, NULL, 1, NULL);
-	xTaskCreate(taskRXCANProcess, "RX CAN Process", 1024, NULL, 1, NULL);
+	xTaskCreate(taskRXCANProcess, "RX CAN Process", 512, NULL, 1, NULL);
 	xTaskCreate(taskRXCAN, "RX CAN", 128, NULL, 1, NULL);
 	xTaskCreate(taskBlink, "blink", 128, NULL, 1, NULL);
+	xTaskCreate(taskSendAccelero, "accel", 256, NULL, 1, NULL);
  }
 extern uint8_t variable;
 void taskBlink(void* can)
@@ -296,6 +297,47 @@ void taskSoundBuzzer(int* time_ms) {
 		vTaskDelete(NULL);
 	}
 }
+
+void taskSendAccelero() {
+/***************************************************************************
+*
+*     Function Information
+*
+*     Name of Function: taskSend
+*
+*     Programmer's Name: Ben Ng
+*
+*     Function Return Type: void
+*
+*     Parameters (list data type, name, and comment one per line):
+*       1.
+*
+*     Global Dependents:
+*
+*     Function Description:
+*     polls accelerometer, and sends the acceleration data over CAN
+*
+***************************************************************************/
+	while (1) {
+		Acceldata_t adata;
+		Accelro_Read_Axes(&adata);
+		CanTxMsgTypeDef tx;
+		tx.StdId = 0x420;
+		tx.Data[0] = (adata.x >> 8) & 0xFF;
+		tx.Data[1] = adata.x & 0xFF;
+		tx.Data[2] = (adata.y >> 8) & 0xFF;
+		tx.Data[3] = adata.y & 0xFF;
+		tx.Data[4] = (adata.z >> 8) & 0xFF;
+		tx.Data[5] = adata.z & 0xFF;
+		tx.DLC = 6;
+		tx.RTR = CAN_RTR_DATA;
+		tx.IDE = CAN_ID_STD;
+		car.phcan->pTxMsg = &tx;
+		HAL_CAN_Transmit_IT(car.phcan);
+		vTaskDelay(10);
+	}
+}
+
 
 void taskCarMainRoutine() {
 	while (1)
