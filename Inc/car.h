@@ -53,7 +53,7 @@
 #define QUEUE_SIZE_PEDALBOXMSG		3
 #define QUEUE_SIZE_TXCAN			3
 #define QUEUE_SIZE_MCFRAME			3
-
+#define POLL_DELAY					1
 
 
 typedef enum
@@ -91,6 +91,19 @@ typedef enum {
 } Calibrate_flag_t;
 
 
+int BCparam;
+int actualTorque0700;
+int actualTorque1508;
+int actualDC;
+int actualDC0700;
+int actualDC1508;
+int DCLimit;
+int DCLimit0700;
+int DCLimit1508;
+int calcTorqueLimit;
+int pedalTorque;
+int actualTorque;
+int torque_to_send;
 
 typedef struct {
 
@@ -149,6 +162,7 @@ void initRTOSObjects();
 void taskBlink(void* can);
 void stopCar();
 void taskSendAccelero();
+void taskMotorControllerPoll();
 
 
 #endif /* CAR_H_ */

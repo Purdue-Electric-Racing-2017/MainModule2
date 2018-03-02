@@ -187,6 +187,7 @@ void initRTOSObjects() {
 	xTaskCreate(taskRXCAN, "RX CAN", 128, NULL, 1, NULL);
 	xTaskCreate(taskBlink, "blink", 128, NULL, 1, NULL);
 	xTaskCreate(taskSendAccelero, "accel", 256, NULL, 1, NULL);
+	xTaskCreate(taskMotorControllerPoll, "Motor Poll", 256, NULL, 1, NULL);
  }
 extern uint8_t variable;
 void taskBlink(void* can)
@@ -242,6 +243,7 @@ void taskMotorControllerPoll(void* param)
 *
 ***************************************************************************/
 {
+	/*
 	int numStates = 2;
 	int state = 0;
 	for (;;)
@@ -265,7 +267,52 @@ void taskMotorControllerPoll(void* param)
 		} else {
 			vTaskDelay(20);
 		}
-	}
+	}*/
+	while(1)
+		{
+			//0x03B
+			//length 5
+			//byte0 - Pack Current - 2 bytes - MSB First - Big Endian - 0.1A
+			//byte1 - IN USE - 1 bytes - MSB First
+			//byte2 - Pack Inst. Voltage - 2 bytes - MSB First - Big Endian - * (1/10) - 0.1V
+			//byte3 - IN USE - 1 bytes - MSB First
+			//byte4 - CRC Checksum - 1 bytes - MSB First  - +64
+			//0x03C
+			//length 2
+			//byte0 - Pack DCL - 2 bytes - MSB First - Big Endian - 1A
+			//byte1 - IN USE - 1bytes - MSB First
+			// Request Parameters
+			while(BCparam != 3)
+			{
+				BCparam = 0;			// BCparam 0 - Nothing received
+				while(BCparam != 1) {
+					mcCmdTransmissionRequestSingle(REGID_I_ACT);
+					vTaskDelay(POLL_DELAY);
+				}	// BCparam 1 - actualTorque received
+				while(BCparam != 2) {
+					mcCmdTransmissionRequestSingle(ID_BMS_PACK_CUR_VOL);
+					vTaskDelay(POLL_DELAY);
+				}	// BCparam 2 - actualDC received
+				while(BCparam != 3) {
+					mcCmdTransmissionRequestSingle(ID_BMS_DCL);
+					vTaskDelay(POLL_DELAY);
+				}	// BCparam 3 - DCLimit received
+			}
+			// Process Updates
+			if(BCparam == 3)
+			{
+				BCparam = 0;
+				calcTorqueLimit = DCLimit / actualDC / 10 * actualTorque;
+				if(calcTorqueLimit > pedalTorque)
+				{
+					torque_to_send = calcTorqueLimit;
+				}
+				else
+				{
+					torque_to_send = pedalTorque;
+				}
+			}
+		}
 }
 
 
