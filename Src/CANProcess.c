@@ -238,6 +238,9 @@ void taskRXCANProcess()
 					ISR_StartButtonPressed();
 					break;
 				}
+				case ID_BMS_PACK_CUR_VOL:
+					actualDC = rx->Data[1] | (rx->Data[1] << 8);
+					actualV = rx->Data[3] | (rx->Data[2]<< 8);
 			}
 		}
 	}
@@ -384,16 +387,12 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 	}
 	if (rx->Data[0] == ID_BMS_PACK_CUR_VOL)
 	{
-		actualDC1508 = rx->Data[1];
-		actualDC0700 = rx->Data[2];
-		actualDC = actualDC0700 | (actualDC1508 << 8);
+
 		BCparam = 2;	//actualDc received
 	}
 	if (rx->Data[0] == ID_BMS_DCL)
 	{
-		DCLimit1508 = rx->Data[1];
-		DCLimit0700 = rx->Data[2];
-		DCLimit = DCLimit0700 | (DCLimit1508 << 8);
+
 		BCparam = 3;	//DCLimit received
 	}
 }

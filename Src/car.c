@@ -282,8 +282,7 @@ void taskMotorControllerPoll(void* param)
 			//byte0 - Pack DCL - 2 bytes - MSB First - Big Endian - 1A
 			//byte1 - IN USE - 1bytes - MSB First
 			// Request Parameters
-			while(BCparam != 3)
-			{
+
 				BCparam = 0;			// BCparam 0 - Nothing received
 				while(BCparam != 1) {
 					mcCmdTransmissionRequestSingle(REGID_I_ACT);
@@ -297,21 +296,7 @@ void taskMotorControllerPoll(void* param)
 					mcCmdTransmissionRequestSingle(ID_BMS_DCL);
 					vTaskDelay(POLL_DELAY);
 				}	// BCparam 3 - DCLimit received
-			}
-			// Process Updates
-			if(BCparam == 3)
-			{
-				BCparam = 0;
-				calcTorqueLimit = DCLimit / actualDC / 10 * actualTorque;
-				if(calcTorqueLimit > pedalTorque)
-				{
-					torque_to_send = calcTorqueLimit;
-				}
-				else
-				{
-					torque_to_send = pedalTorque;
-				}
-			}
+
 		}
 }
 
@@ -462,6 +447,14 @@ void taskCarMainRoutine() {
 		{
 			disableMotor();
 		}
+
+		// calculate
+			calcTorqueLimit = (80000 / (actualDC * 10 * actualV * 10)) //(DCLimit / (actualDC * 10)) * actualTorque;
+			if(torque_to_send/MAX_THROTTLE_LEVEL > calcTorqueLimit)
+			{
+				torque_to_send = calcTorqueLimit * torque_to_send;
+			}
+
 		mcCmdTorque(torque_to_send);  //command the MC to move the motor
 
 

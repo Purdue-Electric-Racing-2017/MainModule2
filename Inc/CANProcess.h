@@ -24,7 +24,7 @@
 #define ID_WHEEL_RR								0x102
 #define ID_WHEEL_RL								0x103
 #define ID_DASHBOARD							0x350
-#define ID_BMS_PACK_CUR_VOL						0x03B
+#define ID_BMS_PACK_CUR_VOL						0x03B //current and voltage
 #define ID_BMS_DCL								0x03C
 
 //wheel module defines
