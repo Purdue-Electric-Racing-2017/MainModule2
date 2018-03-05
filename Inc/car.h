@@ -34,16 +34,17 @@
 #define HEARTBEAT_PIN		GPIO_PIN_1
 
 
-#define BRAKE_PRESSED_THRESHOLD	.05
+#define BRAKE_PRESSED_THRESHOLD	.1
 #define APPS_BP_PLAUS_RESET_THRESHOLD .05  //EV 2.5
 #define APPS_BP_PLAUS_THRESHOLD .25  //EV 2.5
 
-#define TORQUE_SEND_PERIOD			100 / portTICK_RATE_MS
-#define HEARTBEAT_PULSEWIDTH		10 / portTICK_RATE_MS
+#define TORQUE_SEND_PERIOD		 	100 / portTICK_RATE_MS
+#define HEARTBEAT_PULSEWIDTH		200 / portTICK_RATE_MS
 #define HEARTBEAT_PERIOD			100 / portTICK_RATE_MS
-#define PEDALBOX_TIMEOUT			500 / portTICK_RATE_MS
+#define PEDALBOX_TIMEOUT			1000 / portTICK_RATE_MS
+#define POLL_DELAY					50 / portTICK_RATE_MS
 #define MAX_BRAKE_LEVEL 			0xFFF
-#define MAX_THROTTLE_LEVEL			0x7FFF
+#define MAX_THROTTLE_LEVEL			0x7FFE
 #define LC_THRESHOLD				10			// todo lc threshold DUMMY VALUE
 #define LAUNCH_CONTROL_INTERVAL_MS	10
 
@@ -53,7 +54,6 @@
 #define QUEUE_SIZE_PEDALBOXMSG		3
 #define QUEUE_SIZE_TXCAN			3
 #define QUEUE_SIZE_MCFRAME			3
-#define POLL_DELAY					1
 
 
 typedef enum
@@ -101,6 +101,15 @@ int calcTorqueLimit;
 int pedalTorque;
 int actualTorque;
 int torque_to_send;
+int speedActual;
+int currentActual;
+int commandCurrent;
+int dcBusVoltage;
+int motorTemperature;
+int powerStageTemperature;
+int airTemperature;
+int actualCurrentLimit;
+int errBitMap1;
 
 typedef struct {
 
@@ -117,7 +126,7 @@ typedef struct {
 	int32_t				brake2_max;
 	int64_t 				throttle_acc;				//sum of car's intended throttle messages from pedalbox since last cmd sent to MC
 	int16_t					throttle_cnt;				//number of throttle messages in accumulator
-	int16_t 				brake;						//car's intended brake position
+	float 				brake;						//car's intended brake position
 	uint32_t				pb_msg_rx_time;				//indicates when a pedalbox message was last received
 	uint32_t				apps_imp_first_time_ms;		//indicates when the first imp error was received
 	Pedalbox_status_t		apps_state_imp;		//the last pedalbox message imp sate

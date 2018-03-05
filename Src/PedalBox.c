@@ -94,42 +94,27 @@ void taskPedalBoxMsgHandler() {
 			//APPS Implausibility error handling, EV 2.3.5,
 			//	error if throttle sensors disagree more than 10% travel
 			//	for more than 100ms
-			if (fabs(throttle1_cal - throttle2_cal) > .1 ) //legacy: (pedalboxmsg.APPS_Implausible == PEDALBOX_STATUS_ERROR)
-			{
-				//if error is persistent
-				if (car.apps_state_imp == PEDALBOX_STATUS_ERROR_APPSIMP_PROV)
-				{
-					//if time between first error and this error >= 100ms
-					if (car.apps_imp_first_time_ms - current_time_ms >= 100)
-					{
-						car.apps_state_imp = PEDALBOX_STATUS_ERROR;
-					}
-				} else {  //else this is the first message to have an imp error
-					//record the time
-					car.apps_state_imp = PEDALBOX_STATUS_ERROR_APPSIMP_PROV;
-					car.apps_imp_first_time_ms = current_time_ms;
-				}
-			} else {
-				car.apps_state_imp = PEDALBOX_STATUS_NO_ERROR;
-			}
-
-
-			//Brake
-			//check if brake level is greater than the threshold level
-			if (brake_avg >= BRAKE_PRESSED_THRESHOLD) {
-				//brake is presssed
-				carSetBrakeLight(BRAKE_LIGHT_ON);  //turn on brake light
-
-
-				//EV 2.5, check if the throttle level is greater than 25% while brakes are on
-//				if (throttle_avg > APPS_BP_PLAUS_THRESHOLD) {
-//					//set apps-brake pedal plausibility error
-//					car.apps_bp_plaus = PEDALBOX_STATUS_ERROR;
+//			if (fabs(throttle1_cal - throttle2_cal) > .1 ) //legacy: (pedalboxmsg.APPS_Implausible == PEDALBOX_STATUS_ERROR)
+//			{
+//				//if error is persistent
+//				if (car.apps_state_imp == PEDALBOX_STATUS_ERROR_APPSIMP_PROV)
+//				{
+//					//if time between first error and this error >= 100ms
+//					if (car.apps_imp_first_time_ms - current_time_ms >= 100)
+//					{
+//						car.apps_state_imp = PEDALBOX_STATUS_ERROR;
+//					}
+//				} else {  //else this is the first message to have an imp error
+//					//record the time
+//					car.apps_state_imp = PEDALBOX_STATUS_ERROR_APPSIMP_PROV;
+//					car.apps_imp_first_time_ms = current_time_ms;
 //				}
-			} else {
-				//brake is not pressed
-				carSetBrakeLight(BRAKE_LIGHT_OFF);  //turn off brake light
-			}
+//			} else {
+//				car.apps_state_imp = PEDALBOX_STATUS_NO_ERROR;
+//			}
+
+
+
 
 
 //			if (car.apps_state_bp_plaus == PEDALBOX_STATUS_ERROR) {
@@ -139,13 +124,24 @@ void taskPedalBoxMsgHandler() {
 //				}
 //			}
 
-			if (throttle_avg > .1)
-			{
-
+			car.brake = brake_avg;
+			//if (throttle_avg > .1)
+			//{
+				if (throttle_avg > .9)
+				{
+					car.throttle_acc = MAX_THROTTLE_LEVEL;
+				}
+				else
+				{
 				//no errors, set throttle to value received from pedalbox
-				car.throttle_acc += (throttle_avg * MAX_THROTTLE_LEVEL);
-				car.throttle_cnt ++;
-			}
+					car.throttle_acc = (throttle_avg * MAX_THROTTLE_LEVEL);
+				}
+				//car.throttle_cnt ++;
+			//}
+			//else
+			//{
+			//	car.throttle_acc = 0;
+			//}
 
 		}
 	}

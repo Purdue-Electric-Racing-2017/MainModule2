@@ -239,8 +239,8 @@ void taskRXCANProcess()
 					break;
 				}
 				case ID_BMS_PACK_CUR_VOL:
-					actualDC = rx->Data[1] | (rx->Data[1] << 8);
-					actualV = rx->Data[3] | (rx->Data[2]<< 8);
+					actualDC = rx.Data[1] | (rx.Data[1] << 8);
+					actualV = rx.Data[3] | (rx.Data[2]<< 8);
 			}
 		}
 	}
@@ -378,21 +378,73 @@ void processBamoCar(CanRxMsgTypeDef* rx)
 	else
 		send {pedal torque}
 	*/
+//	if (rx->Data[0] == REGID_I_ACT)
+//	{
+//		actualTorque0700 = rx->Data[1];
+//		actualTorque1508 = rx->Data[2];
+//		actualTorque = actualTorque0700 | (actualTorque1508 << 8);
+//		BCparam = 1;	//actualTorque received
+//	}
+//	if (rx->Data[0] == ID_BMS_PACK_CUR_VOL)
+//	{
+//
+//		BCparam = 2;	//actualDc received
+//	}
+//	if (rx->Data[0] == ID_BMS_DCL)
+//	{
+//
+//		BCparam = 3;	//DCLimit received
+//	}
 	if (rx->Data[0] == REGID_I_ACT)
-	{
-		actualTorque0700 = rx->Data[1];
-		actualTorque1508 = rx->Data[2];
-		actualTorque = actualTorque0700 | (actualTorque1508 << 8);
-		BCparam = 1;	//actualTorque received
-	}
-	if (rx->Data[0] == ID_BMS_PACK_CUR_VOL)
-	{
-
-		BCparam = 2;	//actualDc received
-	}
-	if (rx->Data[0] == ID_BMS_DCL)
-	{
-
-		BCparam = 3;	//DCLimit received
-	}
+	    {
+	        actualTorque0700 = rx->Data[1];
+	        actualTorque1508 = rx->Data[2];
+	        actualTorque = actualTorque0700 | (actualTorque1508 << 8);
+	        BCparam = 1;    //actual torque received
+	    }
+	    if (rx->Data[0] == REGID_SPEED_ACTUAL)
+	    {
+	        speedActual = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 2;    //speed actual received
+	    }
+	    if (rx->Data[0] == REGID_I_IST)
+	    {
+	        currentActual = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 3;    //current actual received
+	    }
+	    if (rx->Data[0] == REGID_I_SOLL)
+	    {
+	        commandCurrent = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 4;    //command current received
+	    }
+	    if (rx->Data[0] == REGID_DC_BUS)
+	    {
+	        dcBusVoltage = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 5;    //current actual received
+	    }
+	    if (rx->Data[0] == REGID_T_MOTOR)
+	    {
+	        motorTemperature = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 6;    //motor temperature received
+	    }
+	    if (rx->Data[0] == REGID_T_IGBT)
+	    {
+	        powerStageTemperature = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 7;    //power stage temperature received
+	    }
+	    if (rx->Data[0] == REGID_T_AIR)
+	    {
+	        airTemperature = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 8;    //air temperature received
+	    }
+	    if (rx->Data[0] == REGID_I_REDA)
+	    {
+	        actualCurrentLimit = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 9;    //actual current limit received
+	    }
+	    if (rx->Data[0] == REGID_ERR_BITMAP1)
+	    {
+	        errBitMap1 = (rx -> Data[1] << 8 | rx -> Data[2]);
+	        BCparam = 10;    //errBitMap1 received
+	    }
 }

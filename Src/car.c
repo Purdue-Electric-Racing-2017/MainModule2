@@ -49,10 +49,14 @@ void carInit() {
 	car.brake = 0;
 	car.phcan = &hcan1;
 	car.calibrate_flag = CALIBRATE_NONE;
-	car.throttle1_min = 0x0ab0;
-	car.throttle1_max = 0x0530;
-	car.throttle2_min = 0x08b0;
-	car.throttle2_max = 0x0360;
+	car.throttle1_min = 0x0aa0;
+	car.throttle1_max = 0x0000;
+	car.throttle2_min = 0x0940;
+	car.throttle2_max = 0x0000;
+	car.brake1_min = 0x0290;
+	car.brake1_max = 0x0900;
+	car.brake2_min = 0x0290;
+	car.brake2_max = 0x0900;
 	car.pb_msg_rx_time = 4294967295;
 
 
@@ -66,6 +70,8 @@ void ISR_StartButtonPressed() {
 		//	)
 		car.state = CAR_STATE_PREREADY2DRIVE;
 	} else {
+		xTaskCreate(taskSoundBuzzer, "buzzer is on", 64, (void *) 300, 1, NULL);
+
 		car.state = CAR_STATE_INIT;
 	}
 }
@@ -182,12 +188,12 @@ void initRTOSObjects() {
 	//todo optimize stack depths http://www.freertos.org/FAQMem.html#StackSize
 	xTaskCreate(taskPedalBoxMsgHandler, "PedalBoxMsgHandler", 512, NULL, 1, NULL);
 	xTaskCreate(taskCarMainRoutine, "CarMainRoutine", 512, NULL, 1, NULL);
-	xTaskCreate(taskTXCAN, "TX CAN", 512, NULL, 1, NULL);
-	xTaskCreate(taskRXCANProcess, "RX CAN Process", 512, NULL, 1, NULL);
-	xTaskCreate(taskRXCAN, "RX CAN", 128, NULL, 1, NULL);
-	xTaskCreate(taskBlink, "blink", 128, NULL, 1, NULL);
-	xTaskCreate(taskSendAccelero, "accel", 256, NULL, 1, NULL);
-	xTaskCreate(taskMotorControllerPoll, "Motor Poll", 256, NULL, 1, NULL);
+	xTaskCreate(taskTXCAN, "TX CAN", 256, NULL, 1, NULL);
+	xTaskCreate(taskRXCANProcess, "RX CAN Process", 256, NULL, 1, NULL);
+	xTaskCreate(taskRXCAN, "RX CAN", 256, NULL, 1, NULL);
+	xTaskCreate(taskBlink, "blink", 256, NULL, 1, NULL);
+	//xTaskCreate(taskSendAccelero, "accel", 256, NULL, 1, NULL);
+	//xTaskCreate(taskMotorControllerPoll, "Motor Poll", 256, NULL, 1, NULL);
  }
 extern uint8_t variable;
 void taskBlink(void* can)
@@ -199,105 +205,27 @@ void taskBlink(void* can)
 		HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
 		//HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
 
-		CanTxMsgTypeDef tx;
-		tx.IDE = CAN_ID_STD;
-		tx.RTR = CAN_RTR_DATA;
-		tx.StdId = 0x200;
-		tx.DLC = 1;
-		if (car.state == CAR_STATE_INIT)
-		{
-			tx.Data[0] = 0;
-		}
-		else if (car.state == CAR_STATE_READY2DRIVE)
-		{
-			tx.Data[0] = 1;
-		}
-		car.phcan->pTxMsg = &tx;
-		HAL_CAN_Transmit_IT(car.phcan);						//transmit staged message
-
-		//xQueueSendToBack(rtos_can1.queue_tx, &tx, 100);
-		vTaskDelay(500);
+//		CanTxMsgTypeDef tx;
+//		tx.IDE = CAN_ID_STD;
+//		tx.RTR = CAN_RTR_DATA;
+//		tx.StdId = 0x200;
+//		tx.DLC = 1;
+//		if (car.state == CAR_STATE_INIT)
+//		{
+//			tx.Data[0] = 0;
+//		}
+//		else if (car.state == CAR_STATE_READY2DRIVE)
+//		{
+//			tx.Data[0] = 1;
+//		}
+//		//req regid 40
+//		car.phcan->pTxMsg = &tx;
+//		//HAL_CAN_Transmit_IT(car.phcan);						//transmit staged message
+//
+//		xQueueSendToBack(car.q_txcan, &tx, 100);
+		mcCmdTransmissionRequestSingle(0x40);
+		vTaskDelay(255);
 	}
-}
-
-void taskMotorControllerPoll(void* param)
-/***************************************************************************
-*
-*     Function Information
-*
-*     Name of Function: taskMotorControllerPoll
-*
-*     Programmer's Name: Ben Ng
-*
-*     Function Return Type: void
-*
-*     Parameters (list data type, name, and comment one per line):
-*       1. none
-*
-*     Global Dependents:
-*
-*     Function Description:
-*		This task requsts frames from the motor controller at a constant interval
-*		it does this without verifying that the frames have been sent back
-*		consider doing this with verification and a read requested flag
-*
-***************************************************************************/
-{
-	/*
-	int numStates = 2;
-	int state = 0;
-	for (;;)
-	{
-		if (state > numStates)
-		{
-			state = 0;
-		}
-		switch (state)
-		{
-		// the motor controller frames to request
-			case 0:
-				mcCmdTransmissionRequestSingle(REGID_SPEED_ACTUAL_FILTER);
-			case 1:
-				mcCmdTransmissionRequestSingle(REGID_SPEED_ACTUAL_FILTER);
-		}
-		state++;
-		if (50/state > 20)
-		{
-			vTaskDelay(50/state);
-		} else {
-			vTaskDelay(20);
-		}
-	}*/
-	while(1)
-		{
-			//0x03B
-			//length 5
-			//byte0 - Pack Current - 2 bytes - MSB First - Big Endian - 0.1A
-			//byte1 - IN USE - 1 bytes - MSB First
-			//byte2 - Pack Inst. Voltage - 2 bytes - MSB First - Big Endian - * (1/10) - 0.1V
-			//byte3 - IN USE - 1 bytes - MSB First
-			//byte4 - CRC Checksum - 1 bytes - MSB First  - +64
-			//0x03C
-			//length 2
-			//byte0 - Pack DCL - 2 bytes - MSB First - Big Endian - 1A
-			//byte1 - IN USE - 1bytes - MSB First
-			// Request Parameters
-
-				BCparam = 0;			// BCparam 0 - Nothing received
-				while(BCparam != 1) {
-					mcCmdTransmissionRequestSingle(REGID_I_ACT);
-					vTaskDelay(POLL_DELAY);
-				}	// BCparam 1 - actualTorque received
-				while(BCparam != 2) {
-					mcCmdTransmissionRequestSingle(ID_BMS_PACK_CUR_VOL);
-					vTaskDelay(POLL_DELAY);
-				}	// BCparam 2 - actualDC received
-				while(BCparam != 3) {
-					mcCmdTransmissionRequestSingle(ID_BMS_DCL);
-					vTaskDelay(POLL_DELAY);
-				}	// BCparam 3 - DCLimit received
-
-		}
 }
 
 
@@ -378,16 +306,51 @@ void taskCarMainRoutine() {
 		uint32_t current_time_ms = xTaskGetTickCount() / portTICK_PERIOD_MS;
 		uint16_t torque_to_send = 0;
 
+		//always active block
+		//Brake
+		//check if brake level is greater than the threshold level
+		if (car.brake >= BRAKE_PRESSED_THRESHOLD) {
+			//brake is presssed
+			carSetBrakeLight(BRAKE_LIGHT_ON);  //turn on brake light
 
+
+			//EV 2.5, check if the throttle level is greater than 25% while brakes are on
+//				if (throttle_avg > APPS_BP_PLAUS_THRESHOLD) {
+//					//set apps-brake pedal plausibility error
+//					car.apps_bp_plaus = PEDALBOX_STATUS_ERROR;
+//				}
+		} else {
+			//brake is not pressed
+			carSetBrakeLight(BRAKE_LIGHT_OFF);  //turn off brake light
+		}
+
+		if(car.apps_state_eor == PEDALBOX_STATUS_ERROR)
+		{
+			CanTxMsgTypeDef tx;
+			tx.StdId = 0x333;
+			tx.Data[0] = 1;
+			tx.DLC = 1;
+			tx.IDE = CAN_ID_STD;
+			tx.RTR = CAN_RTR_DATA;
+			car.phcan->pTxMsg = &tx;
+			HAL_CAN_Transmit_IT(car.phcan);
+			vTaskDelay(10);
+		}
+
+		//state dependent block
 		if (car.state == CAR_STATE_INIT)
 		{
 			disableMotor();
+			HAL_GPIO_WritePin(Pump_Relay_CTRL_GPIO_Port, Pump_Relay_CTRL_Pin, GPIO_PIN_RESET); //turn on pump
+
+
 			//assert these pins always
 			HAL_GPIO_WritePin(SDC_CTRL_GPIO_Port, SDC_CTRL_Pin, GPIO_PIN_SET); //close SDC
 			HAL_GPIO_WritePin(Motor_Controller_Relay_CTRL_GPIO_Port, Motor_Controller_Relay_CTRL_Pin, GPIO_PIN_SET); //turn on mc
 		}
 		if (car.state == CAR_STATE_PREREADY2DRIVE)
 		{
+
 			HAL_GPIO_WritePin(Pump_Relay_CTRL_GPIO_Port, Pump_Relay_CTRL_Pin, GPIO_PIN_SET); //turn on pump
 			//bamocar 5.2
 			//Contacts of the safety device closed,
@@ -438,9 +401,10 @@ void taskCarMainRoutine() {
 
 				}*/
 
-				torque_to_send = car.throttle_acc / car.throttle_cnt; //gets average
-				car.throttle_acc = 0;
-				car.throttle_cnt = 0;
+				torque_to_send = car.throttle_acc; //gets average
+
+				//car.throttle_acc = 0;
+				//car.throttle_cnt = 0;
 			}
 		}
 		if (car.state == CAR_STATE_ERROR)
@@ -449,11 +413,11 @@ void taskCarMainRoutine() {
 		}
 
 		// calculate
-			calcTorqueLimit = (80000 / (actualDC * 10 * actualV * 10)) //(DCLimit / (actualDC * 10)) * actualTorque;
-			if(torque_to_send/MAX_THROTTLE_LEVEL > calcTorqueLimit)
-			{
-				torque_to_send = calcTorqueLimit * torque_to_send;
-			}
+//			calcTorqueLimit = (80000 / (actualDC * 10 * actualV * 10)); //(DCLimit / (actualDC * 10)) * actualTorque;
+//			if(torque_to_send/MAX_THROTTLE_LEVEL > calcTorqueLimit)
+//			{
+//				torque_to_send = calcTorqueLimit * torque_to_send;
+//			}
 
 		mcCmdTorque(torque_to_send);  //command the MC to move the motor
 

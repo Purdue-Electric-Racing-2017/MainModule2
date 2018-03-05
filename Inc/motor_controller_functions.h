@@ -48,6 +48,10 @@ void mcCmdTorque(uint16_t);
 #define REGID_I_REDA				0x48
 #define	REGID_V_OUT					0x8A
 #define REGID_I_ACT					0x20
+#define REGID_I_IST                 0x20
+#define REGID_I_SOLL                0x26
+#define REGID_DC_BUS                0xeb
+#define REGID_ERR_BITMAP1           0x8f
 
 
 //0x40 status bits
